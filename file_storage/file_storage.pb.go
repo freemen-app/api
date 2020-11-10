@@ -7,8 +7,12 @@
 package fileStorage
 
 import (
+	context "context"
 	proto "github.com/golang/protobuf/proto"
 	empty "github.com/golang/protobuf/ptypes/empty"
+	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -466,4 +470,191 @@ func file_file_storage_proto_init() {
 	file_file_storage_proto_rawDesc = nil
 	file_file_storage_proto_goTypes = nil
 	file_file_storage_proto_depIdxs = nil
+}
+
+// Reference imports to suppress errors if they are not otherwise used.
+var _ context.Context
+var _ grpc.ClientConnInterface
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the grpc package it is being compiled against.
+const _ = grpc.SupportPackageIsVersion6
+
+// FileStorageClient is the client API for FileStorage service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type FileStorageClient interface {
+	Upload(ctx context.Context, opts ...grpc.CallOption) (FileStorage_UploadClient, error)
+	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	BatchDelete(ctx context.Context, in *BatchDeleteRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+}
+
+type fileStorageClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewFileStorageClient(cc grpc.ClientConnInterface) FileStorageClient {
+	return &fileStorageClient{cc}
+}
+
+func (c *fileStorageClient) Upload(ctx context.Context, opts ...grpc.CallOption) (FileStorage_UploadClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_FileStorage_serviceDesc.Streams[0], "/pb.FileStorage/Upload", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &fileStorageUploadClient{stream}
+	return x, nil
+}
+
+type FileStorage_UploadClient interface {
+	Send(*UploadRequest) error
+	CloseAndRecv() (*UploadResponse, error)
+	grpc.ClientStream
+}
+
+type fileStorageUploadClient struct {
+	grpc.ClientStream
+}
+
+func (x *fileStorageUploadClient) Send(m *UploadRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *fileStorageUploadClient) CloseAndRecv() (*UploadResponse, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(UploadResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *fileStorageClient) Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/pb.FileStorage/Delete", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileStorageClient) BatchDelete(ctx context.Context, in *BatchDeleteRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/pb.FileStorage/BatchDelete", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// FileStorageServer is the server API for FileStorage service.
+type FileStorageServer interface {
+	Upload(FileStorage_UploadServer) error
+	Delete(context.Context, *DeleteRequest) (*empty.Empty, error)
+	BatchDelete(context.Context, *BatchDeleteRequest) (*empty.Empty, error)
+}
+
+// UnimplementedFileStorageServer can be embedded to have forward compatible implementations.
+type UnimplementedFileStorageServer struct {
+}
+
+func (*UnimplementedFileStorageServer) Upload(FileStorage_UploadServer) error {
+	return status.Errorf(codes.Unimplemented, "method Upload not implemented")
+}
+func (*UnimplementedFileStorageServer) Delete(context.Context, *DeleteRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+}
+func (*UnimplementedFileStorageServer) BatchDelete(context.Context, *BatchDeleteRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method BatchDelete not implemented")
+}
+
+func RegisterFileStorageServer(s *grpc.Server, srv FileStorageServer) {
+	s.RegisterService(&_FileStorage_serviceDesc, srv)
+}
+
+func _FileStorage_Upload_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(FileStorageServer).Upload(&fileStorageUploadServer{stream})
+}
+
+type FileStorage_UploadServer interface {
+	SendAndClose(*UploadResponse) error
+	Recv() (*UploadRequest, error)
+	grpc.ServerStream
+}
+
+type fileStorageUploadServer struct {
+	grpc.ServerStream
+}
+
+func (x *fileStorageUploadServer) SendAndClose(m *UploadResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *fileStorageUploadServer) Recv() (*UploadRequest, error) {
+	m := new(UploadRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func _FileStorage_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileStorageServer).Delete(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.FileStorage/Delete",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileStorageServer).Delete(ctx, req.(*DeleteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileStorage_BatchDelete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BatchDeleteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileStorageServer).BatchDelete(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.FileStorage/BatchDelete",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileStorageServer).BatchDelete(ctx, req.(*BatchDeleteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _FileStorage_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "pb.FileStorage",
+	HandlerType: (*FileStorageServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Delete",
+			Handler:    _FileStorage_Delete_Handler,
+		},
+		{
+			MethodName: "BatchDelete",
+			Handler:    _FileStorage_BatchDelete_Handler,
+		},
+	},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "Upload",
+			Handler:       _FileStorage_Upload_Handler,
+			ClientStreams: true,
+		},
+	},
+	Metadata: "file_storage.proto",
 }
